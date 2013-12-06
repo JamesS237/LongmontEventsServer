@@ -21,6 +21,20 @@ def getEvents(request, year, month, day):
 	json_returned = simplejson.dumps(event_list)
 	return cHttpResponse(json_returned)
 
+def getEventsWithDateRange(request, year, month, day, year1, month1, day1):
+	date_string = year+'-'+month+'-'+day
+	date_string1 = year1+'-'+month1+'-'+day1
+
+	event_for_day = Event.objects.filter(date__range=[date_string, date_string1]).order_by('-going_count')
+	event_list = []
+	for event in event_for_day:
+		date_fix = event.date.strftime('%m/%d/%Y')
+		time_fix = event.time.strftime('%H:%M:%S')
+		event_dict = {'identifier': event.pk, 'title': event.title, 'description': event.description, 'time': time_fix, 'date': date_fix, 'address': event.address}
+		event_list.append(event_dict)
+	json_returned = simplejson.dumps(event_list)
+	return cHttpResponse(json_returned)
+
 def getEvent(request, identifier):
 	event = Event.objects.get(pk=identifier)
 	date_fix = event.date.strftime('%m/%d/%Y')
